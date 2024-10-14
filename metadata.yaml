@@ -1,0 +1,5 @@
+homepage: "https://leadtrackr.io"
+documentation: "https://reflective-patio-274.notion.site/Setting-up-a-lead-source-with-GTM-dcd8c913f57e4896a8074738850d3f87"
+versions:
+  - sha: 5ba319c94d3d170d575ae008a98632ee7263d036
+    changeNotes: "Initial release"
