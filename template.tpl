@@ -1,4 +1,4 @@
-﻿___TERMS_OF_SERVICE___
+___TERMS_OF_SERVICE___
 
 By creating or modifying this file you agree to Google Tag Manager's Community
 Template Gallery Developer Terms of Service available at
@@ -261,6 +261,25 @@ ___TEMPLATE_PARAMETERS___
             "type": "EQUALS"
           }
         ]
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "customChannelFlowData",
+        "checkboxText": "Use Custom Channel Flow Data",
+        "simpleValueType": true
+      },
+      {
+        "type": "TEXT",
+        "name": "channelFlowData",
+        "displayName": "Overwrite channel data",
+        "simpleValueType": true,
+        "enablingConditions": [
+          {
+            "paramName": "customChannelFlowData",
+            "paramValue": true,
+            "type": "EQUALS"
+          }
+        ]
       }
     ]
   }
@@ -351,7 +370,7 @@ if (url) {
       !fbc ||
       (fbc &&
         fbc.split('.')[fbc.split('.').length - 1] !==
-          decodeUriComponent(urlParsed.searchParams.fbclid))
+        decodeUriComponent(urlParsed.searchParams.fbclid))
     ) {
       fbc =
         'fb.' +
@@ -411,6 +430,22 @@ postBodyData.attributionData = {
   wbraid: mapData(data.attributionData, 'wbraid') || wbraid,
   cid: mapData(data.attributionData, 'cid') || cid
 };
+
+// ChannelFlow ophalen uit de cookie of de variabele in de template
+let channelFlowFinal = data.channelFlowData;
+
+// Als de variabele niet is gevuld en er een cookie is, probeer de cookie te parsen
+if (!channelFlowFinal) {
+  const channelFlowCookieValue = getCookieValues('lt_channelflow')[0];
+  if (channelFlowCookieValue && channelFlowCookieValue.charAt(0) === '[') {
+    channelFlowFinal = JSON.parse(channelFlowCookieValue);
+  }
+}
+
+// Voeg de channelFlow toe aan de postBodyData als het bestaat
+if (channelFlowFinal) {
+  postBodyData.channelFlow = channelFlowFinal;
+}
 
 // JSON body van de request
 const postBody = JSON.stringify(postBodyData);
