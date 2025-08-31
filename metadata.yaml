@@ -1,6 +1,8 @@
 homepage: "https://leadtrackr.io"
 documentation: "https://reflective-patio-274.notion.site/Setting-up-a-lead-source-with-GTM-dcd8c913f57e4896a8074738850d3f87"
 versions:
+  - sha: bdf4d99a378263da3824f53b7d68da811762104d
+    changeNotes: "bugfix wrong permissions"
   - sha: 45d450ecd0a6f5bc2f76f854f8b5521bf6d92908
     changeNotes: "added channelflow integration"
   - sha: 5ba319c94d3d170d575ae008a98632ee7263d036
