@@ -647,6 +647,10 @@ ___SERVER_PERMISSIONS___
               {
                 "type": 1,
                 "string": "FPID"
+              },
+              {
+                "type": 1,
+                "string": "lt_channelflow"
               }
             ]
           }
