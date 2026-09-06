@@ -60,8 +60,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "lead",
-        "type": "EQUALS"
+        "paramValue": "pageview",
+        "type": "NOT_EQUALS"
       }
     ],
     "help": "The public ID of your LeadTrackr project. Find it in the LeadTrackr dashboard under <b>Settings</b>."
@@ -74,8 +74,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "lead",
-        "type": "EQUALS"
+        "paramValue": "pageview",
+        "type": "NOT_EQUALS"
       }
     ],
     "help": "Recommended. Find it in the LeadTrackr dashboard under <b>Settings → API Integration</b>.<br/><br/>\nWith a key the lead is sent to the authenticated <i>createServerSideLead</i> endpoint. Leave it empty and the tag falls back to the unauthenticated <i>createLead</i> endpoint, which keeps existing setups working but accepts leads from anyone who knows your Project ID.<br/><br/>\nStore the key in a <b>Google Cloud Secret Manager</b> or environment variable rather than typing it into the tag.<br/><br/>\n<a href=\"https://leadtrackr.io/docs/api-reference/authentication\">Authenticating with the LeadTrackr API</a>"
@@ -88,8 +88,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "lead",
-        "type": "EQUALS"
+        "paramValue": "pageview",
+        "type": "NOT_EQUALS"
       }
     ],
     "subParams": [
@@ -126,14 +126,14 @@ ___TEMPLATE_PARAMETERS___
   },
   {
     "type": "GROUP",
-    "name": "userDataGroup",
+    "name": "userData",
     "displayName": "User Data",
     "groupStyle": "ZIPPY_OPEN",
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "lead",
-        "type": "EQUALS"
+        "paramValue": "pageview",
+        "type": "NOT_EQUALS"
       }
     ],
     "subParams": [
@@ -180,14 +180,14 @@ ___TEMPLATE_PARAMETERS___
                 "value": "uniqueIdentifier",
                 "displayValue": "Unique Identifier"
               }
-            ],
-            "isUnique": true
+            ]
           },
           {
             "defaultValue": "",
             "displayName": "Value",
             "name": "value",
-            "type": "TEXT"
+            "type": "TEXT",
+            "isUnique": true
           }
         ],
         "newRowButtonText": "Add Value"
@@ -202,8 +202,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "lead",
-        "type": "EQUALS"
+        "paramValue": "pageview",
+        "type": "NOT_EQUALS"
       }
     ],
     "subParams": [
@@ -369,8 +369,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "lead",
-        "type": "EQUALS"
+        "paramValue": "pageview",
+        "type": "NOT_EQUALS"
       }
     ],
     "subParams": [
@@ -405,15 +405,14 @@ ___TEMPLATE_PARAMETERS___
             "type": "SELECT",
             "selectItems": [
               {
-                "value": "ipAddress",
+                "value": "ipAdress",
                 "displayValue": "IP Address"
               },
               {
                 "value": "userAgent",
                 "displayValue": "User Agent"
               }
-            ],
-            "isUnique": true
+            ]
           },
           {
             "defaultValue": "",
@@ -536,8 +535,7 @@ ___TEMPLATE_PARAMETERS___
                 "value": "conversionPage",
                 "displayValue": "Conversion Page"
               }
-            ],
-            "isUnique": true
+            ]
           },
           {
             "defaultValue": "",

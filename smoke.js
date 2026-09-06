@@ -321,5 +321,28 @@ t('lead: no unique identifier is sent when nothing provides one', () => {
   assert.strictEqual('uniqueIdentifier' in b, false);
 });
 
+/* ---------- Upgrading an existing tag ---------- */
+// A tag saved against the old template stores no tagType at all. It has to keep
+// behaving as a Lead tag, with every configured value still reaching the API.
+t('upgrade: a config without tagType still sends a lead, with its project id', () => {
+  const r = run({ projectId: 'legacy-project', formName: 'Contactformulier',
+                  dedupEnabled: false,
+                  userDataFields: [{ key: 'email', value: 'oud@example.nl' }],
+                  customDeviceData: true, deviceData: [{ key: 'ipAdress', value: '198.51.100.7' }] },
+    { eventData: leadEvent });
+  assert.strictEqual(r.requests.length, 1);
+  const b = r.requests[0].body;
+  assert.strictEqual(b.projectId, 'legacy-project');
+  assert.strictEqual(b.formData.formName, 'Contactformulier');
+  assert.strictEqual(b.userData.email, 'oud@example.nl');
+  assert.strictEqual(b.deviceData.ipAddress, '198.51.100.7');
+  assert.strictEqual(r.requests[0].url, 'https://app.leadtrackr.io/api/leads/createLead');
+});
+
+t('upgrade: only an explicit pageview tagType runs the Channel Flow Tracker', () => {
+  assert.strictEqual(run({ projectId: 'p1' }, { eventData: leadEvent }).setCookies.length, 0);
+  assert.strictEqual(run({ tagType: '', projectId: 'p1' }, { eventData: leadEvent }).requests.length, 1);
+});
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
