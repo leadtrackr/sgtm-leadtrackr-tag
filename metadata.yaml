@@ -1,5 +1,5 @@
 homepage: "https://leadtrackr.io"
-documentation: "https://reflective-patio-274.notion.site/Setting-up-a-lead-source-with-GTM-dcd8c913f57e4896a8074738850d3f87"
+documentation: "https://leadtrackr.io/docs/lead-sources/server-side-gtm"
 versions:
   - sha: bdf4d99a378263da3824f53b7d68da811762104d
     changeNotes: "bugfix wrong permissions"
