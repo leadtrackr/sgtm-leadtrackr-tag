@@ -123,10 +123,18 @@ t('lead: authenticated endpoint and X-API-Key when a key is set', () => {
   assert.strictEqual(r.success, 1);
 });
 
-t('lead: falls back to the open endpoint without a key', () => {
+t('lead: still posts to the authenticated endpoint without a key, header omitted', () => {
   const r = run({ tagType: 'lead', projectId: 'p1', formName: 'Contact' }, { eventData: leadEvent });
-  assert.strictEqual(r.requests[0].url, 'https://app.leadtrackr.io/api/leads/createLead');
+  assert.strictEqual(r.requests[0].url, 'https://app.leadtrackr.io/api/leads/createServerSideLead');
   assert.strictEqual(r.requests[0].options.headers['X-API-Key'], undefined);
+});
+
+t('lead: userData is always in the body, since the endpoint rejects it otherwise', () => {
+  const b = run({ tagType: 'lead', projectId: 'p1', autoMapUserData: false }, {
+    eventData: { page_location: 'https://www.example.nl/c?gclid=x' }
+  }).requests[0].body;
+  assert.strictEqual(typeof b.userData, 'object');
+  assert.notStrictEqual(b.userData, null);
 });
 
 t('lead: user data is auto-mapped and hashed fields are skipped', () => {
@@ -336,7 +344,7 @@ t('upgrade: a config without tagType still sends a lead, with its project id', (
   assert.strictEqual(b.formData.formName, 'Contactformulier');
   assert.strictEqual(b.userData.email, 'oud@example.nl');
   assert.strictEqual(b.deviceData.ipAddress, '198.51.100.7');
-  assert.strictEqual(r.requests[0].url, 'https://app.leadtrackr.io/api/leads/createLead');
+  assert.strictEqual(r.requests[0].url, 'https://app.leadtrackr.io/api/leads/createServerSideLead');
 });
 
 t('upgrade: only an explicit pageview tagType runs the Channel Flow Tracker', () => {

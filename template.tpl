@@ -78,7 +78,7 @@ ___TEMPLATE_PARAMETERS___
         "type": "NOT_EQUALS"
       }
     ],
-    "help": "Recommended. Find it in the LeadTrackr dashboard under <b>Settings → API Integration</b>.<br/><br/>\nWith a key the lead is sent to the authenticated <i>createServerSideLead</i> endpoint. Leave it empty and the tag falls back to the unauthenticated <i>createLead</i> endpoint, which keeps existing setups working but accepts leads from anyone who knows your Project ID.<br/><br/>\nStore the key in a <b>Google Cloud Secret Manager</b> or environment variable rather than typing it into the tag.<br/><br/>\n<a href=\"https://leadtrackr.io/docs/api-reference/authentication\">Authenticating with the LeadTrackr API</a>"
+    "help": "Required. Find it in the LeadTrackr dashboard under <b>Settings → API Integration</b>.<br/><br/>\nThe tag always posts to <i>createServerSideLead</i> and passes this key in the <i>X-API-Key</i> header. A project with an API token configured answers <b>401</b> when the key is missing or wrong, and the tag reports a failure; projects that predate API tokens still accept the request without one.<br/><br/>\n<b>Upgrading an existing tag:</b> if your project already has an API token, fill this in before you publish. The tag no longer falls back to the open <i>createLead</i> endpoint.<br/><br/>\nStore the key in a <b>Google Cloud Secret Manager</b> or environment variable rather than typing it into the tag.<br/><br/>\n<a href=\"https://leadtrackr.io/docs/api-reference/authentication\">Authenticating with the LeadTrackr API</a>"
   },
   {
     "type": "GROUP",
@@ -907,6 +907,7 @@ function sendLead() {
   const payload = {};
   payload.projectId = data.projectId;
   payload.formData = buildFormData();
+  // Always present, even when empty: the endpoint rejects a body without it.
   payload.userData = buildUserData();
 
   const deviceData = buildDeviceData();
@@ -921,10 +922,12 @@ function sendLead() {
   const uniqueIdentifier = getUniqueIdentifier();
   if (isValidValue(uniqueIdentifier)) payload.uniqueIdentifier = makeString(uniqueIdentifier);
 
-  // The authenticated endpoint is the one to use. Without a key the tag stays
-  // on the open endpoint so existing containers keep sending leads.
+  // A server container always posts to the authenticated endpoint. It rejects
+  // the request when the project has an API token and the header is missing,
+  // which is the point: a lead intake reachable with nothing but a project ID
+  // does not belong in a server-side setup.
   const useApiKey = isValidValue(data.apiKey);
-  const requestUrl = API_BASE + (useApiKey ? 'createServerSideLead' : 'createLead');
+  const requestUrl = API_BASE + 'createServerSideLead';
 
   const headers = { 'Content-Type': 'application/json' };
   if (useApiKey) headers['X-API-Key'] = data.apiKey;

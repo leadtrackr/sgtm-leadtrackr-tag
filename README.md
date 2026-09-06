@@ -11,7 +11,9 @@ Pick one under **Tag Type** when you create the tag.
 Sends a lead to the LeadTrackr API. Fire it on your lead event.
 
 - **Project ID** — from the LeadTrackr dashboard under *Settings*.
-- **API Key** — from *Settings → API Integration*. With a key the lead goes to the authenticated `createServerSideLead` endpoint through the `X-API-Key` header. Without one the tag falls back to the open `createLead` endpoint, which keeps older containers working but accepts leads from anyone who knows the Project ID. Store the key in a Google Cloud Secret Manager or environment variable rather than typing it into the tag.
+- **API Key** — from *Settings → API Integration*. The tag always posts to `createServerSideLead` and passes the key in the `X-API-Key` header. A project with an API token configured answers `401` when the key is missing or wrong, and the tag reports a failure; projects that predate API tokens still accept the request without one. Store the key in a Google Cloud Secret Manager or environment variable rather than typing it into the tag.
+
+  A lead intake reachable with nothing but a Project ID does not belong in a server-side setup, so there is no fallback to the open `createLead` endpoint. **If you are upgrading a tag on a project that already has an API token, fill the key in before you publish.**
 - **Auto-mapping** — on by default for user data, the event ID and attribution data. Anything you enter by hand always overrides the automatic value.
 
 The tag reads the click and browser IDs for every ad channel: Google (`gclid`, `wbraid`, `gbraid`, `dclid`), Meta, Microsoft, TikTok, LinkedIn, Snapchat, Reddit, Pinterest, X and OpenAI. Each is taken from the URL parameter of the incoming page first and the platform's own cookie second. Cookies are only read, never created — an ID the tag invents is one the platform cannot match.
