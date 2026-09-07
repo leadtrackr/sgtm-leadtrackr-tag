@@ -57,6 +57,18 @@ ___TEMPLATE_PARAMETERS___
     "help": "<b>Lead</b> sends a lead to the LeadTrackr API. Fire it on your lead event.<br/><br/>\n<b>Channel Flow Tracker</b> builds the visitor's channel journey in the <i>lt_channelflow</i> and <i>lt_session</i> cookies from this container, so the web container tag is no longer required. Fire it on every pageview event.<br/><br/>\n<b>Requirements for the server-side Channel Flow:</b> your tagging server must run on a first-party subdomain of the website (e.g. <i>sgtm.example.com</i>), and the client handling the request must return a response to the browser — the GA4 client does. Without both, the cookies cannot be written on your own domain.<br/><br/>\nDo not run this next to the web container's Channel Flow Tracker. Both write the same cookies and you gain nothing from having two.<br/><br/>\n<a href=\"https://leadtrackr.io/docs/lead-sources/channel-flow-tracker\">How Channel Flow records sessions and resolves a channel</a>"
   },
   {
+    "type": "LABEL",
+    "name": "leadFieldsNotUsedNotice",
+    "displayName": "The Lead settings below are not used by this tag type. Leave them as they are — they belong to the Lead type and are ignored here.",
+    "enablingConditions": [
+      {
+        "paramName": "tagType",
+        "paramValue": "update",
+        "type": "EQUALS"
+      }
+    ]
+  },
+  {
     "type": "TEXT",
     "name": "projectId",
     "displayName": "Project ID",
@@ -64,8 +76,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "lead",
-        "type": "EQUALS"
+        "paramValue": "pageview",
+        "type": "NOT_EQUALS"
       }
     ],
     "help": "The public ID of your LeadTrackr project. Find it in the LeadTrackr dashboard under <b>Settings</b>."
@@ -78,8 +90,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "lead",
-        "type": "EQUALS"
+        "paramValue": "pageview",
+        "type": "NOT_EQUALS"
       }
     ],
     "help": "Required. Find it in the LeadTrackr dashboard under <b>Settings → API Integration</b>.<br/><br/>\nThe tag always posts to <i>createServerSideLead</i> and passes this key in the <i>X-API-Key</i> header. A project with an API token configured answers <b>401</b> when the key is missing or wrong, and the tag reports a failure; projects that predate API tokens still accept the request without one.<br/><br/>\n<b>Upgrading an existing tag:</b> if your project already has an API token, fill this in before you publish. The tag no longer falls back to the open <i>createLead</i> endpoint.<br/><br/>\nStore the key in a <b>Google Cloud Secret Manager</b> or environment variable rather than typing it into the tag.<br/><br/>\n<a href=\"https://leadtrackr.io/docs/api-reference/authentication\">Authenticating with the LeadTrackr API</a>"
@@ -92,8 +104,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "lead",
-        "type": "EQUALS"
+        "paramValue": "pageview",
+        "type": "NOT_EQUALS"
       }
     ],
     "subParams": [
@@ -136,8 +148,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "lead",
-        "type": "EQUALS"
+        "paramValue": "pageview",
+        "type": "NOT_EQUALS"
       }
     ],
     "subParams": [
@@ -206,8 +218,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "lead",
-        "type": "EQUALS"
+        "paramValue": "pageview",
+        "type": "NOT_EQUALS"
       }
     ],
     "subParams": [
@@ -717,8 +729,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "lead",
-        "type": "EQUALS"
+        "paramValue": "pageview",
+        "type": "NOT_EQUALS"
       }
     ],
     "subParams": [
