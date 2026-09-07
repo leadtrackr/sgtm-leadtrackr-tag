@@ -352,5 +352,131 @@ t('upgrade: only an explicit pageview tagType runs the Channel Flow Tracker', ()
   assert.strictEqual(run({ tagType: '', projectId: 'p1' }, { eventData: leadEvent }).requests.length, 1);
 });
 
+/* ---------- Update Lead (webhook integration) ---------- */
+const WEBHOOK = 'https://app.leadtrackr.io/api/integrations/custom/8b_6HW92tj1b';
+const purchase = {
+  page_location: 'https://www.example.nl/bedankt?gclid=EAIaIQobChMI',
+  event_name: 'purchase',
+  transaction_id: '1000140158',
+  value: 2370.62,
+  currency: 'EUR',
+  client_id: '811268591.1734445582',
+  ga_session_id: '1787643311',
+  user_agent: 'Mozilla/5.0 (Macintosh)',
+  ip_override: '203.0.113.9',
+  user_data: {
+    email: 'jane@example.com',
+    phone_number: '0612345678',
+    address: { first_name: 'Jane', last_name: 'Jansen', city: 'Haarlem', postal_code: '2025BL', country: 'NL' }
+  }
+};
+const webhookCfg = { tagType: 'update', webhookUrl: WEBHOOK, webhookApiKey: 'wh_secret',
+                     webhookEventId: 'order-1000140158' };
+
+t('webhook: posts to the configured endpoint with the connection token', () => {
+  const r = run(webhookCfg, { eventData: purchase, cookies: { _fbp: 'fb.1.1734445584314.5949' } });
+  assert.strictEqual(r.requests[0].url, WEBHOOK);
+  assert.strictEqual(r.requests[0].options.headers['X-API-Key'], 'wh_secret');
+  assert.strictEqual(r.requests[0].options.headers['x-event-id'], 'order-1000140158');
+  assert.strictEqual(r.success, 1);
+});
+
+t('webhook: builds the documented payload shape', () => {
+  const b = run(webhookCfg, { eventData: purchase, cookies: { _fbp: 'fb.1.1734445584314.5949' } }).requests[0].body;
+  assert.deepStrictEqual(b, {
+    event_id: 'order-1000140158',
+    event_name: 'purchase',
+    transaction_id: '1000140158',
+    value: 2370.62,
+    currency: 'EUR',
+    attribution: {
+      gclid: 'EAIaIQobChMI',
+      fbp: 'fb.1.1734445584314.5949',
+      ga_cid: '811268591.1734445582',
+      ga_sid: '1787643311',
+      user_agent: 'Mozilla/5.0 (Macintosh)',
+      ip: '203.0.113.9'
+    },
+    user_data: {
+      email: 'jane@example.com',
+      phone_number: '0612345678',
+      address: { first_name: 'Jane', last_name: 'Jansen', city: 'Haarlem', postal_code: '2025BL', country: 'NL' }
+    }
+  });
+});
+
+t('webhook: value is a number, and a non-numeric one is left out', () => {
+  const b1 = run(webhookCfg, { eventData: purchase }).requests[0].body;
+  assert.strictEqual(typeof b1.value, 'number');
+  const b2 = run(Object.assign({}, webhookCfg, { webhookValue: 'gratis' }),
+    { eventData: purchase }).requests[0].body;
+  assert.strictEqual('value' in b2, false);
+});
+
+t('webhook: event id falls back to the event data and rides in the header', () => {
+  const r = run({ tagType: 'update', webhookUrl: WEBHOOK }, {
+    eventData: Object.assign({}, purchase, { event_id: 'evt-99' })
+  });
+  assert.strictEqual(r.requests[0].body.event_id, 'evt-99');
+  assert.strictEqual(r.requests[0].options.headers['x-event-id'], 'evt-99');
+});
+
+t('webhook: a mapped row overrides the auto-mapped value', () => {
+  const b = run(Object.assign({}, webhookCfg, {
+    webhookUserDataFields: [{ key: 'email', value: 'mapped@example.com' },
+                            { key: 'city', value: 'Amsterdam' }],
+    webhookAttributionFields: [{ key: 'gclid', value: 'mapped-gclid' }]
+  }), { eventData: purchase }).requests[0].body;
+  assert.strictEqual(b.user_data.email, 'mapped@example.com');
+  assert.strictEqual(b.user_data.address.city, 'Amsterdam');
+  assert.strictEqual(b.user_data.address.last_name, 'Jansen');
+  assert.strictEqual(b.attribution.gclid, 'mapped-gclid');
+});
+
+t('webhook: auto-mapping off leaves only what was mapped by hand', () => {
+  const b = run(Object.assign({}, webhookCfg, {
+    autoMapWebhookUserData: false, autoMapWebhookAttribution: false, autoMapWebhookEvent: false,
+    webhookUserDataFields: [{ key: 'email', value: 'only@example.com' }]
+  }), { eventData: purchase }).requests[0].body;
+  assert.deepStrictEqual(b.user_data, { email: 'only@example.com' });
+  assert.strictEqual('attribution' in b, false);
+  assert.strictEqual('event_name' in b, false);
+  assert.strictEqual(b.event_id, 'order-1000140158');
+});
+
+t('webhook: additional fields land at the top level', () => {
+  const b = run(Object.assign({}, webhookCfg, {
+    webhookExtraFields: [{ key: 'store_id', value: 'NL-01' }]
+  }), { eventData: purchase }).requests[0].body;
+  assert.strictEqual(b.store_id, 'NL-01');
+});
+
+t('webhook: a custom auth header name is honoured', () => {
+  const h = run(Object.assign({}, webhookCfg, { webhookAuthHeader: 'X-Shop-Token' }),
+    { eventData: purchase }).requests[0].options.headers;
+  assert.strictEqual(h['X-Shop-Token'], 'wh_secret');
+  assert.strictEqual(h['X-API-Key'], undefined);
+});
+
+t('webhook: no endpoint url reports a failure instead of posting', () => {
+  const r = run({ tagType: 'update', webhookApiKey: 'x' }, { eventData: purchase });
+  assert.strictEqual(r.requests.length, 0);
+  assert.strictEqual(r.failure, 1);
+});
+
+t('webhook: the consent gate applies here too', () => {
+  const r = run(Object.assign({}, webhookCfg, { consentRequirement: 'ad_storage' }), {
+    eventData: Object.assign({}, purchase, { consent_state: { ad_storage: false } })
+  });
+  assert.strictEqual(r.requests.length, 0);
+  assert.strictEqual(r.success, 1);
+});
+
+t('webhook: the lead and pageview modes are untouched by the new type', () => {
+  assert.strictEqual(run({ tagType: 'lead', projectId: 'p1' }, { eventData: leadEvent })
+    .requests[0].url, 'https://app.leadtrackr.io/api/leads/createServerSideLead');
+  assert.strictEqual(run({ tagType: 'pageview' }, { eventData: purchase }).setCookies.length, 2);
+});
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
