@@ -46,27 +46,11 @@ ___TEMPLATE_PARAMETERS___
       {
         "value": "pageview",
         "displayValue": "Channel Flow Tracker (pageview/config)"
-      },
-      {
-        "value": "update",
-        "displayValue": "Update Lead (webhook integration)"
       }
     ],
     "simpleValueType": true,
     "defaultValue": "lead",
     "help": "<b>Lead</b> sends a lead to the LeadTrackr API. Fire it on your lead event.<br/><br/>\n<b>Channel Flow Tracker</b> builds the visitor's channel journey in the <i>lt_channelflow</i> and <i>lt_session</i> cookies from this container, so the web container tag is no longer required. Fire it on every pageview event.<br/><br/>\n<b>Requirements for the server-side Channel Flow:</b> your tagging server must run on a first-party subdomain of the website (e.g. <i>sgtm.example.com</i>), and the client handling the request must return a response to the browser — the GA4 client does. Without both, the cookies cannot be written on your own domain.<br/><br/>\nDo not run this next to the web container's Channel Flow Tracker. Both write the same cookies and you gain nothing from having two.<br/><br/>\n<a href=\"https://leadtrackr.io/docs/lead-sources/channel-flow-tracker\">How Channel Flow records sessions and resolves a channel</a>"
-  },
-  {
-    "type": "LABEL",
-    "name": "leadFieldsNotUsedNotice",
-    "displayName": "The Lead settings below are not used by this tag type. Leave them as they are — they belong to the Lead type and are ignored here.",
-    "enablingConditions": [
-      {
-        "paramName": "tagType",
-        "paramValue": "update",
-        "type": "EQUALS"
-      }
-    ]
   },
   {
     "type": "TEXT",
@@ -242,350 +226,6 @@ ___TEMPLATE_PARAMETERS___
           }
         ],
         "newRowButtonText": "Add Value"
-      }
-    ]
-  },
-  {
-    "type": "GROUP",
-    "name": "webhookConnection",
-    "displayName": "Webhook Connection",
-    "groupStyle": "ZIPPY_OPEN",
-    "enablingConditions": [
-      {
-        "paramName": "tagType",
-        "paramValue": "update",
-        "type": "EQUALS"
-      }
-    ],
-    "subParams": [
-      {
-        "type": "TEXT",
-        "name": "webhookUrl",
-        "displayName": "Endpoint URL",
-        "simpleValueType": true,
-        "help": "The custom endpoint of the integration you created in LeadTrackr, for example <i>https://app.leadtrackr.io/api/integrations/custom/8b_6HW92tj1b</i>. Copy it from the connection's settings.<br/><br/>\nIt has to be on <i>app.leadtrackr.io</i>: the template's permissions allow that host and nothing else."
-      },
-      {
-        "type": "TEXT",
-        "name": "webhookApiKey",
-        "displayName": "API Key",
-        "simpleValueType": true,
-        "help": "The token of this <b>connection</b>, which is a different one from the project API Key used by the Lead tag. You set it when you create the integration.<br/><br/>\nStore it in a <b>Google Cloud Secret Manager</b> or environment variable rather than typing it into the tag."
-      },
-      {
-        "type": "TEXT",
-        "name": "webhookAuthHeader",
-        "displayName": "Auth Header Name",
-        "simpleValueType": true,
-        "defaultValue": "X-API-Key",
-        "help": "Only change this if you configured a different header name on the connection."
-      }
-    ]
-  },
-  {
-    "type": "GROUP",
-    "name": "webhookEventGroup",
-    "displayName": "Event Data",
-    "groupStyle": "ZIPPY_OPEN",
-    "enablingConditions": [
-      {
-        "paramName": "tagType",
-        "paramValue": "update",
-        "type": "EQUALS"
-      }
-    ],
-    "subParams": [
-      {
-        "type": "CHECKBOX",
-        "name": "autoMapWebhookEvent",
-        "checkboxText": "Automatically map the event from the event data",
-        "simpleValueType": true,
-        "defaultValue": true,
-        "help": "Anything you enter below always overrides the auto-mapped value.<br/><br/>\nDefault mappings:\n<ul>\n<li><b>Event Name:</b> <i>eventData.event_name</i></li>\n<li><b>Event ID:</b> <i>eventData.event_id</i>, <i>eventData.eventId</i>, <i>eventData.transaction_id</i></li>\n<li><b>Transaction ID:</b> <i>eventData.transaction_id</i>, <i>eventData.order_id</i></li>\n<li><b>Value:</b> <i>eventData.value</i>, <i>eventData.x-ga-mp1-ev</i>, <i>eventData.x-ga-mp1-tr</i></li>\n<li><b>Currency:</b> <i>eventData.currency</i></li>\n</ul>\nThe Event ID also travels in the <i>x-event-id</i> header, which LeadTrackr uses to recognise a retry of the same event."
-      },
-      {
-        "type": "TEXT",
-        "name": "webhookEventName",
-        "displayName": "Event Name",
-        "simpleValueType": true,
-        "help": "What the connection's mapping rules match on, for example <i>purchase</i>."
-      },
-      {
-        "type": "TEXT",
-        "name": "webhookEventId",
-        "displayName": "Event ID",
-        "simpleValueType": true,
-        "help": "The sender's own ID for this event. LeadTrackr falls back to it as the lead's <i>uniqueEventId</i> when the connection's identity mapping resolves no lead."
-      },
-      {
-        "type": "TEXT",
-        "name": "webhookTransactionId",
-        "displayName": "Transaction ID",
-        "simpleValueType": true
-      },
-      {
-        "type": "TEXT",
-        "name": "webhookValue",
-        "displayName": "Value",
-        "simpleValueType": true,
-        "help": "Sent as a number. A value that is not a finite number is left out rather than sent as text."
-      },
-      {
-        "type": "TEXT",
-        "name": "webhookCurrency",
-        "displayName": "Currency",
-        "simpleValueType": true,
-        "help": "Three-letter code, for example <i>EUR</i>."
-      }
-    ]
-  },
-  {
-    "type": "GROUP",
-    "name": "webhookUserDataGroup",
-    "displayName": "User Data",
-    "groupStyle": "ZIPPY_OPEN",
-    "enablingConditions": [
-      {
-        "paramName": "tagType",
-        "paramValue": "update",
-        "type": "EQUALS"
-      }
-    ],
-    "subParams": [
-      {
-        "type": "CHECKBOX",
-        "name": "autoMapWebhookUserData",
-        "checkboxText": "Automatically map user data from the event data",
-        "simpleValueType": true,
-        "defaultValue": true,
-        "help": "Read from the same places as the Lead tag: <i>eventData.user_data</i> including its <i>address</i>, and the plain <i>eventData</i> equivalents. Hashed values are ignored — LeadTrackr matches on plain ones.<br/><br/>\n<b>Email</b>, <b>Phone Number</b> and <b>Company</b> are sent at the top of <i>user_data</i>; <b>First Name</b>, <b>Last Name</b>, <b>City</b>, <b>Postal Code</b> and <b>Country</b> are nested under <i>user_data.address</i>, which is the shape LeadTrackr's extractor reads."
-      },
-      {
-        "type": "SIMPLE_TABLE",
-        "name": "webhookUserDataFields",
-        "displayName": "",
-        "simpleTableColumns": [
-          {
-            "defaultValue": "",
-            "displayName": "Key",
-            "name": "key",
-            "type": "SELECT",
-            "selectItems": [
-              {
-                "value": "email",
-                "displayValue": "Email"
-              },
-              {
-                "value": "phone_number",
-                "displayValue": "Phone Number"
-              },
-              {
-                "value": "company",
-                "displayValue": "Company"
-              },
-              {
-                "value": "first_name",
-                "displayValue": "First Name"
-              },
-              {
-                "value": "last_name",
-                "displayValue": "Last Name"
-              },
-              {
-                "value": "city",
-                "displayValue": "City"
-              },
-              {
-                "value": "postal_code",
-                "displayValue": "Postal Code"
-              },
-              {
-                "value": "country",
-                "displayValue": "Country"
-              }
-            ]
-          },
-          {
-            "defaultValue": "",
-            "displayName": "Value",
-            "name": "value",
-            "type": "TEXT"
-          }
-        ],
-        "newRowButtonText": "Add Value"
-      }
-    ]
-  },
-  {
-    "type": "GROUP",
-    "name": "webhookAttributionGroup",
-    "displayName": "Attribution Data",
-    "groupStyle": "ZIPPY_OPEN",
-    "enablingConditions": [
-      {
-        "paramName": "tagType",
-        "paramValue": "update",
-        "type": "EQUALS"
-      }
-    ],
-    "subParams": [
-      {
-        "type": "CHECKBOX",
-        "name": "autoMapWebhookAttribution",
-        "checkboxText": "Automatically map attribution data from the event data",
-        "simpleValueType": true,
-        "defaultValue": true,
-        "help": "Collected exactly as the Lead tag does — URL parameter first, then the platform's own cookie — but written under the names this endpoint expects. <i>ga_cid</i> and <i>ga_sid</i> are normalised to LeadTrackr's <i>cid</i> and <i>sid</i> on arrival, and <i>user_agent</i> and <i>ip</i> are routed into the lead's device data rather than its attribution.<br/><br/>\nAnything you enter below always overrides the auto-mapped value."
-      },
-      {
-        "type": "SIMPLE_TABLE",
-        "name": "webhookAttributionFields",
-        "displayName": "",
-        "simpleTableColumns": [
-          {
-            "defaultValue": "",
-            "displayName": "Key",
-            "name": "key",
-            "type": "SELECT",
-            "selectItems": [
-              {
-                "value": "gclid",
-                "displayValue": "GCLID"
-              },
-              {
-                "value": "gbraid",
-                "displayValue": "GBRAID"
-              },
-              {
-                "value": "wbraid",
-                "displayValue": "WBRAID"
-              },
-              {
-                "value": "msclkid",
-                "displayValue": "Microsoft Click ID"
-              },
-              {
-                "value": "fbc",
-                "displayValue": "FB Click ID (_fbc)"
-              },
-              {
-                "value": "fbp",
-                "displayValue": "FB Browser ID (_fbp)"
-              },
-              {
-                "value": "dclid",
-                "displayValue": "DCLID"
-              },
-              {
-                "value": "uetvid",
-                "displayValue": "Microsoft Visitor ID (_uetvid)"
-              },
-              {
-                "value": "ttclid",
-                "displayValue": "TikTok Click ID (ttclid)"
-              },
-              {
-                "value": "ttp",
-                "displayValue": "TikTok Browser ID (_ttp)"
-              },
-              {
-                "value": "li_fat_id",
-                "displayValue": "LinkedIn Click ID (li_fat_id)"
-              },
-              {
-                "value": "scclid",
-                "displayValue": "Snapchat Click ID (ScCid)"
-              },
-              {
-                "value": "scid",
-                "displayValue": "Snapchat Browser ID (_scid)"
-              },
-              {
-                "value": "rdt_cid",
-                "displayValue": "Reddit Click ID (rdt_cid)"
-              },
-              {
-                "value": "rdt_uuid",
-                "displayValue": "Reddit Browser ID (_rdt_uuid)"
-              },
-              {
-                "value": "epik",
-                "displayValue": "Pinterest Click ID (epik)"
-              },
-              {
-                "value": "twclid",
-                "displayValue": "X Click ID (twclid)"
-              },
-              {
-                "value": "oppref",
-                "displayValue": "OpenAI Click ID (oppref)"
-              },
-              {
-                "value": "obref",
-                "displayValue": "OpenAI Browser ID (__obref)"
-              },
-              {
-                "value": "ga_cid",
-                "displayValue": "GA4 Client ID"
-              },
-              {
-                "value": "ga_sid",
-                "displayValue": "GA4 Session ID"
-              },
-              {
-                "value": "user_agent",
-                "displayValue": "User Agent"
-              },
-              {
-                "value": "ip",
-                "displayValue": "IP Address"
-              }
-            ]
-          },
-          {
-            "defaultValue": "",
-            "displayName": "Value",
-            "name": "value",
-            "type": "TEXT"
-          }
-        ],
-        "newRowButtonText": "Add Value"
-      }
-    ]
-  },
-  {
-    "type": "GROUP",
-    "name": "webhookExtraGroup",
-    "displayName": "Additional Fields",
-    "groupStyle": "ZIPPY_CLOSED",
-    "enablingConditions": [
-      {
-        "paramName": "tagType",
-        "paramValue": "update",
-        "type": "EQUALS"
-      }
-    ],
-    "subParams": [
-      {
-        "type": "SIMPLE_TABLE",
-        "name": "webhookExtraFields",
-        "displayName": "",
-        "simpleTableColumns": [
-          {
-            "defaultValue": "",
-            "displayName": "Key",
-            "name": "key",
-            "type": "TEXT"
-          },
-          {
-            "defaultValue": "",
-            "displayName": "Value",
-            "name": "value",
-            "type": "TEXT"
-          }
-        ],
-        "newRowButtonText": "Add Field",
-        "help": "Extra keys at the top level of the payload. The connection's mapping rules can read any path you send, so this is where anything the fields above do not cover goes."
       }
     ]
   },
@@ -1020,11 +660,7 @@ if (data.tagType === 'pageview') {
 }
 
 // An absent tagType is a tag saved before the type existed, which was a Lead.
-if (data.tagType === 'update') {
-  sendWebhookEvent();
-} else {
-  sendLead();
-}
+sendLead();
 
 /*==============================================================================
   Channel Flow
@@ -1426,8 +1062,6 @@ function buildAttributionData() {
     assign(attributionData, 'sid', getGa4SessionId());
     assign(attributionData, 'conversionPage', getConversionPage());
 
-    // Only this endpoint keeps the consent state: the webhook intake reads each
-    // attribution key as a string and drops anything nested.
     const consentState = getConsentState();
     if (hasKeys(consentState)) attributionData.consent = consentState;
   }
@@ -1439,8 +1073,7 @@ function buildAttributionData() {
   return attributionData;
 }
 
-// Every click and browser id both tag types send, under LeadTrackr's own names.
-// Kept in one place so the Lead and webhook payloads cannot drift apart.
+// Every click and browser id the lead carries, under LeadTrackr's own names.
 function collectClickIds() {
   const ids = {};
 
@@ -1606,189 +1239,6 @@ function getChannelFlowForLead() {
   return undefined;
 }
 
-/*==============================================================================
-  Update Lead (webhook integration)
-
-  Posts to the custom endpoint of an integration connection. The payload follows
-  the convention LeadTrackr's extractor reads: an `attribution` object whose
-  ga_cid/ga_sid are normalised to cid/sid and whose user_agent/ip are routed
-  into device data, a `user_data` object with names nested one level under
-  `address`, and event_id/transaction_id as the fallback uniqueEventId. Every
-  other key is left for the connection's own mapping rules.
-==============================================================================*/
-
-function sendWebhookEvent() {
-  const payload = {};
-  const autoMap = data.autoMapWebhookEvent !== false;
-
-  const eventId = data.webhookEventId ||
-    (autoMap ? firstValid([eventData.event_id, eventData.eventId, eventData.transaction_id]) : undefined);
-  assign(payload, 'event_id', eventId ? makeString(eventId) : undefined);
-
-  assign(payload, 'event_name', data.webhookEventName ||
-    (autoMap ? eventData.event_name : undefined));
-
-  const transactionId = data.webhookTransactionId ||
-    (autoMap ? firstValid([eventData.transaction_id, eventData.order_id]) : undefined);
-  assign(payload, 'transaction_id', transactionId ? makeString(transactionId) : undefined);
-
-  const value = toFiniteNumber(data.webhookValue ||
-    (autoMap ? firstValid([eventData.value, eventData['x-ga-mp1-ev'], eventData['x-ga-mp1-tr']]) : undefined));
-  if (value !== undefined) payload.value = value;
-
-  assign(payload, 'currency', data.webhookCurrency || (autoMap ? eventData.currency : undefined));
-
-  const attribution = buildWebhookAttribution();
-  if (hasKeys(attribution)) payload.attribution = attribution;
-
-  const userData = buildWebhookUserData();
-  if (hasKeys(userData)) payload.user_data = userData;
-
-  const extra = tableToObject(data.webhookExtraFields);
-  for (const key in extra) {
-    payload[key] = extra[key];
-  }
-
-  const headers = { 'Content-Type': 'application/json' };
-  if (isValidValue(data.webhookApiKey)) {
-    headers[data.webhookAuthHeader || 'X-API-Key'] = data.webhookApiKey;
-  }
-  // LeadTrackr reads this to recognise a retry of an event it already handled.
-  if (isValidValue(payload.event_id)) headers['x-event-id'] = payload.event_id;
-
-  const requestUrl = data.webhookUrl;
-  if (!isValidValue(requestUrl)) {
-    if (isDebug) log('LeadTrackr: no endpoint URL configured on the webhook tag.');
-    return data.gtmOnFailure();
-  }
-
-  const postBody = JSON.stringify(payload);
-
-  if (isDebug) {
-    log(JSON.stringify({
-      Name: 'LeadTrackr Webhook Request',
-      Type: 'Request',
-      RequestUrl: requestUrl,
-      Authenticated: isValidValue(data.webhookApiKey),
-      RequestBody: payload
-    }));
-  }
-
-  sendHttpRequest(requestUrl, (statusCode, responseHeaders, body) => {
-    if (isDebug) {
-      log(JSON.stringify({
-        Name: 'LeadTrackr Webhook Response',
-        Type: 'Response',
-        ResponseStatusCode: statusCode,
-        ResponseHeaders: responseHeaders,
-        ResponseBody: body
-      }));
-    }
-
-    if (statusCode >= 200 && statusCode < 300) {
-      data.gtmOnSuccess();
-    } else {
-      data.gtmOnFailure();
-    }
-  }, { headers: headers, method: 'POST' }, postBody);
-}
-
-function buildWebhookUserData() {
-  const overrides = tableToObject(data.webhookUserDataFields);
-  const flat = {};
-
-  if (data.autoMapWebhookUserData !== false) {
-    const sources = readEventUserData();
-    assign(flat, 'email', firstValid([
-      eventData.email, eventData.email_address, sources.ud.email_address, sources.ud.email
-    ]));
-    assign(flat, 'phone_number', firstValid([
-      eventData.phone, eventData.phone_number, sources.ud.phone_number, sources.ud.phone
-    ]));
-    assign(flat, 'company', firstValid([
-      eventData.company_name, eventData.companyName, eventData.company, sources.ud.company_name
-    ]));
-    assign(flat, 'first_name', firstValid([
-      eventData.first_name, eventData.firstName, eventData.nameFirst,
-      sources.ud.first_name, sources.address.first_name
-    ]));
-    assign(flat, 'last_name', firstValid([
-      eventData.last_name, eventData.lastName, eventData.nameLast,
-      sources.ud.last_name, sources.address.last_name
-    ]));
-    assign(flat, 'city', firstValid([eventData.city, sources.ud.city, sources.address.city]));
-    assign(flat, 'postal_code', firstValid([
-      eventData.postal_code, eventData.zip, sources.ud.postal_code, sources.address.postal_code
-    ]));
-    assign(flat, 'country', firstValid([
-      eventData.country, eventData.countryCode, sources.ud.country, sources.address.country
-    ]));
-  }
-
-  for (const key in overrides) {
-    flat[key] = overrides[key];
-  }
-
-  // The extractor reads names either at the top of user_data or one level under
-  // `address`. The address shape is the documented one, so that is what is sent.
-  const addressKeys = ['first_name', 'last_name', 'city', 'postal_code', 'country'];
-  const userData = {};
-  const address = {};
-  for (const key in flat) {
-    if (addressKeys.indexOf(key) === -1) userData[key] = flat[key];
-    else address[key] = flat[key];
-  }
-  if (hasKeys(address)) userData.address = address;
-
-  return userData;
-}
-
-function buildWebhookAttribution() {
-  const overrides = tableToObject(data.webhookAttributionFields);
-  const attribution = {};
-
-  if (data.autoMapWebhookAttribution !== false) {
-    // The same set the Lead type collects, so the two cannot drift apart. Keys
-    // the intake does not recognise are stored verbatim, which is how the ids
-    // beyond its documented six reach the outbound integrations.
-    mergeInto(attribution, collectClickIds());
-
-    // Google Analytics ids arrive under these names and are normalised to
-    // cid and sid on the way in.
-    assign(attribution, 'ga_cid', getGa4ClientId());
-    assign(attribution, 'ga_sid', getGa4SessionId());
-
-    // No conversionPage here: this event fires on the page that completes the
-    // purchase, not the one where the lead converted, so it would overwrite a
-    // correct value with a misleading one.
-
-    // Routed into the lead's device data on arrival, not its attribution.
-    assign(attribution, 'user_agent', eventData.user_agent || getRequestHeader('user-agent'));
-    if (eventData.ip_override) {
-      assign(attribution, 'ip', makeString(eventData.ip_override).split(' ').join('').split(',')[0]);
-    }
-  }
-
-  for (const key in overrides) {
-    attribution[key] = overrides[key];
-  }
-
-  return attribution;
-}
-
-// Shared by the Lead and webhook mappers so both read a user_data object the
-// same way, whether its address arrives as an array or a plain object.
-function readEventUserData() {
-  let ud = {};
-  let address = {};
-  if (getType(eventData.user_data) === 'object') {
-    ud = eventData.user_data;
-    const addressType = getType(ud.address);
-    if (addressType === 'array') address = ud.address[0] || {};
-    else if (addressType === 'object') address = ud.address;
-  }
-  return { ud: ud, address: address };
-}
 
 /*==============================================================================
   Consent
@@ -1850,17 +1300,6 @@ function getQueryParam(name) {
   return decodeUriComponent(makeString(value));
 }
 
-function toFiniteNumber(value) {
-  if (!isValidValue(value)) return undefined;
-
-  const valueType = getType(value);
-  if (valueType !== 'number' && valueType !== 'string') return undefined;
-
-  const parsed = makeNumber(value);
-  // Rejects NaN and the infinities in one comparison.
-  if (parsed * 0 !== 0) return undefined;
-  return parsed;
-}
 
 function isValidValue(value) {
   const valueType = getType(value);
@@ -1892,6 +1331,20 @@ function tableToObject(table) {
     }
   }
   return result;
+}
+
+// Reads a user_data object the same way whether its address arrives as an
+// array or a plain object.
+function readEventUserData() {
+  let ud = {};
+  let address = {};
+  if (getType(eventData.user_data) === 'object') {
+    ud = eventData.user_data;
+    const addressType = getType(ud.address);
+    if (addressType === 'array') address = ud.address[0] || {};
+    else if (addressType === 'object') address = ud.address;
+  }
+  return { ud: ud, address: address };
 }
 
 function firstValid(values) {

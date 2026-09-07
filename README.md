@@ -33,58 +33,6 @@ The logic matches the web container's Channel Flow Tracker exactly — sessions 
 
 There is no reason to run this alongside the web container's tracker. Both write the same cookies in the same format, so nothing breaks, but you gain nothing and get two places to check whenever attribution looks wrong.
 
-### Update Lead (webhook integration)
-
-Posts an event to the custom endpoint of an integration connection, so an
-existing lead can be updated and its conversion sent on. Fire it on the event
-that should update the lead, typically a purchase.
-
-- **Endpoint URL** — the custom endpoint from the connection's settings, e.g.
-  `https://app.leadtrackr.io/api/integrations/custom/8b_6HW92tj1b`. It has to be
-  on `app.leadtrackr.io`; the template's permissions allow that host and nothing else.
-- **API Key** — the token of *this connection*, a different one from the project
-  API Key the Lead tag uses. Sent in `X-API-Key`, or in whatever header name you
-  configured on the connection.
-
-The payload follows the convention LeadTrackr's extractor reads:
-
-```json
-{
-  "event_id": "order-1000140158",
-  "event_name": "purchase",
-  "transaction_id": "1000140158",
-  "value": 2370.62,
-  "currency": "EUR",
-  "attribution": {
-    "gclid": "EAIaIQobChMI...",
-    "fbp": "fb.1.1734445584314.5949...",
-    "ga_cid": "811268591.1734445582",
-    "ga_sid": "1787643311",
-    "user_agent": "Mozilla/5.0 (Macintosh...)",
-    "ip": "203.0.113.9"
-  },
-  "user_data": {
-    "email": "jane@example.com",
-    "phone_number": "0612345678",
-    "address": {
-      "first_name": "Jane",
-      "last_name": "Jansen",
-      "city": "Haarlem",
-      "postal_code": "2025BL",
-      "country": "NL"
-    }
-  }
-}
-```
-
-Everything in it is auto-mapped from the incoming event and can be overridden
-per field. `ga_cid` and `ga_sid` are normalised to `cid` and `sid` on arrival;
-`user_agent` and `ip` are routed into the lead's device data rather than its
-attribution. `event_id` also travels in the `x-event-id` header, which LeadTrackr
-uses to recognise a retry of the same event. Anything the fields do not cover
-goes in **Additional Fields** as extra top-level keys, which the connection's
-mapping rules can read by path.
-
 ## Tag Execution Consent Settings
 
 Both tag types can be gated on Google Consent Mode: send always (the default), only when `analytics_storage` is granted, or only when `ad_storage` is granted. The state is read from `eventData.consent_state`, otherwise from the `x-ga-gcs` signal. A container without Consent Mode is never silently switched off — a consent type the site does not set counts as absent, not denied.
