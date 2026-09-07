@@ -64,13 +64,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "pageview",
-        "type": "NOT_EQUALS"
-      },
-      {
-        "paramName": "tagType",
-        "paramValue": "update",
-        "type": "NOT_EQUALS"
+        "paramValue": "lead",
+        "type": "EQUALS"
       }
     ],
     "help": "The public ID of your LeadTrackr project. Find it in the LeadTrackr dashboard under <b>Settings</b>."
@@ -83,13 +78,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "pageview",
-        "type": "NOT_EQUALS"
-      },
-      {
-        "paramName": "tagType",
-        "paramValue": "update",
-        "type": "NOT_EQUALS"
+        "paramValue": "lead",
+        "type": "EQUALS"
       }
     ],
     "help": "Required. Find it in the LeadTrackr dashboard under <b>Settings → API Integration</b>.<br/><br/>\nThe tag always posts to <i>createServerSideLead</i> and passes this key in the <i>X-API-Key</i> header. A project with an API token configured answers <b>401</b> when the key is missing or wrong, and the tag reports a failure; projects that predate API tokens still accept the request without one.<br/><br/>\n<b>Upgrading an existing tag:</b> if your project already has an API token, fill this in before you publish. The tag no longer falls back to the open <i>createLead</i> endpoint.<br/><br/>\nStore the key in a <b>Google Cloud Secret Manager</b> or environment variable rather than typing it into the tag.<br/><br/>\n<a href=\"https://leadtrackr.io/docs/api-reference/authentication\">Authenticating with the LeadTrackr API</a>"
@@ -102,13 +92,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "pageview",
-        "type": "NOT_EQUALS"
-      },
-      {
-        "paramName": "tagType",
-        "paramValue": "update",
-        "type": "NOT_EQUALS"
+        "paramValue": "lead",
+        "type": "EQUALS"
       }
     ],
     "subParams": [
@@ -151,13 +136,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "pageview",
-        "type": "NOT_EQUALS"
-      },
-      {
-        "paramName": "tagType",
-        "paramValue": "update",
-        "type": "NOT_EQUALS"
+        "paramValue": "lead",
+        "type": "EQUALS"
       }
     ],
     "subParams": [
@@ -226,13 +206,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "pageview",
-        "type": "NOT_EQUALS"
-      },
-      {
-        "paramName": "tagType",
-        "paramValue": "update",
-        "type": "NOT_EQUALS"
+        "paramValue": "lead",
+        "type": "EQUALS"
       }
     ],
     "subParams": [
@@ -690,13 +665,8 @@ ___TEMPLATE_PARAMETERS___
     "enablingConditions": [
       {
         "paramName": "tagType",
-        "paramValue": "pageview",
-        "type": "NOT_EQUALS"
-      },
-      {
-        "paramName": "tagType",
-        "paramValue": "update",
-        "type": "NOT_EQUALS"
+        "paramValue": "lead",
+        "type": "EQUALS"
       }
     ],
     "subParams": [
