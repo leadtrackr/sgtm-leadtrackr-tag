@@ -461,6 +461,58 @@ ___TEMPLATE_PARAMETERS___
                 "displayValue": "FB Browser ID (_fbp)"
               },
               {
+                "value": "dclid",
+                "displayValue": "DCLID"
+              },
+              {
+                "value": "uetvid",
+                "displayValue": "Microsoft Visitor ID (_uetvid)"
+              },
+              {
+                "value": "ttclid",
+                "displayValue": "TikTok Click ID (ttclid)"
+              },
+              {
+                "value": "ttp",
+                "displayValue": "TikTok Browser ID (_ttp)"
+              },
+              {
+                "value": "li_fat_id",
+                "displayValue": "LinkedIn Click ID (li_fat_id)"
+              },
+              {
+                "value": "scclid",
+                "displayValue": "Snapchat Click ID (ScCid)"
+              },
+              {
+                "value": "scid",
+                "displayValue": "Snapchat Browser ID (_scid)"
+              },
+              {
+                "value": "rdt_cid",
+                "displayValue": "Reddit Click ID (rdt_cid)"
+              },
+              {
+                "value": "rdt_uuid",
+                "displayValue": "Reddit Browser ID (_rdt_uuid)"
+              },
+              {
+                "value": "epik",
+                "displayValue": "Pinterest Click ID (epik)"
+              },
+              {
+                "value": "twclid",
+                "displayValue": "X Click ID (twclid)"
+              },
+              {
+                "value": "oppref",
+                "displayValue": "OpenAI Click ID (oppref)"
+              },
+              {
+                "value": "obref",
+                "displayValue": "OpenAI Browser ID (__obref)"
+              },
+              {
                 "value": "ga_cid",
                 "displayValue": "GA4 Client ID"
               },
@@ -1356,45 +1408,14 @@ function buildAttributionData() {
   const attributionData = {};
 
   if (data.autoMapAttributionData !== false) {
-    assign(attributionData, 'gclid', googleClickId('gclid', ['_gcl_aw', 'FPGCLAW']));
-    assign(attributionData, 'wbraid', googleClickId('wbraid', ['_gcl_gb', 'FPGCLGB']));
-    assign(attributionData, 'gbraid', googleClickId('gbraid', ['_gcl_ag', 'FPGCLAG']));
-    // Collected but not actionable: Google Ads' ClickConversion takes gclid,
-    // gbraid or wbraid only. dclid belongs to Campaign Manager 360 and DV360.
-    assign(attributionData, 'dclid', googleClickId('dclid', ['_gcl_dc', 'FPGCLDC']));
+    mergeInto(attributionData, collectClickIds());
 
-    assign(attributionData, 'fbc', getFbc());
-    assign(attributionData, 'fbp', firstValid([
-      getCookieValues('_fbp')[0], (eventData.common_cookie || {})._fbp, eventData._fbp, eventData.fbp
-    ]));
-
-    // UET's browser pixel writes the cookie's own name into its value, so
-    // '_uet561f11...' has to be sent as '561f11...'.
-    let msclkid = firstOf('msclkid', ['_uetmsclkid']);
-    if (msclkid && msclkid.indexOf('_uet') === 0) msclkid = msclkid.substring(4);
-    assign(attributionData, 'msclkid', msclkid);
-    assign(attributionData, 'uetvid', firstOf('', ['_uetvid']));
-
-    assign(attributionData, 'ttclid', firstOf('ttclid', ['ttclid']));
-    assign(attributionData, 'ttp', firstOf('', ['_ttp']));
-    assign(attributionData, 'li_fat_id', firstOf('li_fat_id', ['li_fat_id']));
-    // Snapchat capitalises its parameter where nobody else does.
-    assign(attributionData, 'scclid', firstOf('ScCid', ['_scclid']));
-    assign(attributionData, 'scid', firstOf('', ['_scid']));
-    // rdt_cid without the underscore is what Reddit's older pixel wrote.
-    assign(attributionData, 'rdt_cid', firstOf('rdt_cid', ['_rdt_cid', 'rdt_cid']));
-    assign(attributionData, 'rdt_uuid', firstOf('', ['_rdt_uuid']));
-    assign(attributionData, 'epik', firstOf('epik', ['_epik']));
-    assign(attributionData, 'twclid', firstOf('twclid', ['twclid']));
-    // OpenAI's cookies are its parameter with a __ prefix.
-    assign(attributionData, 'oppref', firstOf('oppref', ['__oppref']));
-    assign(attributionData, 'obref', firstOf('', ['__obref']));
-
-    assign(attributionData, 'cid', firstValid([eventData.client_id, getGa4IdFromCookie()]));
-    assign(attributionData, 'sid', firstValid([eventData.ga_session_id, eventData.session_id]));
-
+    assign(attributionData, 'cid', getGa4ClientId());
+    assign(attributionData, 'sid', getGa4SessionId());
     assign(attributionData, 'conversionPage', getConversionPage());
 
+    // Only this endpoint keeps the consent state: the webhook intake reads each
+    // attribution key as a string and drops anything nested.
     const consentState = getConsentState();
     if (hasKeys(consentState)) attributionData.consent = consentState;
   }
@@ -1404,6 +1425,63 @@ function buildAttributionData() {
   }
 
   return attributionData;
+}
+
+// Every click and browser id both tag types send, under LeadTrackr's own names.
+// Kept in one place so the Lead and webhook payloads cannot drift apart.
+function collectClickIds() {
+  const ids = {};
+
+  assign(ids, 'gclid', googleClickId('gclid', ['_gcl_aw', 'FPGCLAW']));
+  assign(ids, 'wbraid', googleClickId('wbraid', ['_gcl_gb', 'FPGCLGB']));
+  assign(ids, 'gbraid', googleClickId('gbraid', ['_gcl_ag', 'FPGCLAG']));
+  // Collected but not actionable: Google Ads' ClickConversion takes gclid,
+  // gbraid or wbraid only. dclid belongs to Campaign Manager 360 and DV360.
+  assign(ids, 'dclid', googleClickId('dclid', ['_gcl_dc', 'FPGCLDC']));
+
+  assign(ids, 'fbc', getFbc());
+  assign(ids, 'fbp', firstValid([
+    getCookieValues('_fbp')[0], (eventData.common_cookie || {})._fbp, eventData._fbp, eventData.fbp
+  ]));
+
+  // UET's browser pixel writes the cookie's own name into its value, so
+  // '_uet561f11...' has to be sent as '561f11...'.
+  let msclkid = firstOf('msclkid', ['_uetmsclkid']);
+  if (msclkid && msclkid.indexOf('_uet') === 0) msclkid = msclkid.substring(4);
+  assign(ids, 'msclkid', msclkid);
+  assign(ids, 'uetvid', firstOf('', ['_uetvid']));
+
+  assign(ids, 'ttclid', firstOf('ttclid', ['ttclid']));
+  assign(ids, 'ttp', firstOf('', ['_ttp']));
+  assign(ids, 'li_fat_id', firstOf('li_fat_id', ['li_fat_id']));
+  // Snapchat capitalises its parameter where nobody else does.
+  assign(ids, 'scclid', firstOf('ScCid', ['_scclid']));
+  assign(ids, 'scid', firstOf('', ['_scid']));
+  // rdt_cid without the underscore is what Reddit's older pixel wrote.
+  assign(ids, 'rdt_cid', firstOf('rdt_cid', ['_rdt_cid', 'rdt_cid']));
+  assign(ids, 'rdt_uuid', firstOf('', ['_rdt_uuid']));
+  assign(ids, 'epik', firstOf('epik', ['_epik']));
+  assign(ids, 'twclid', firstOf('twclid', ['twclid']));
+  // OpenAI's cookies are its parameter with a __ prefix.
+  assign(ids, 'oppref', firstOf('oppref', ['__oppref']));
+  assign(ids, 'obref', firstOf('', ['__obref']));
+
+  return ids;
+}
+
+function getGa4ClientId() {
+  return firstValid([eventData.client_id, getGa4IdFromCookie()]);
+}
+
+function getGa4SessionId() {
+  return firstValid([eventData.ga_session_id, eventData.session_id]);
+}
+
+function mergeInto(target, source) {
+  for (const key in source) {
+    target[key] = source[key];
+  }
+  return target;
 }
 
 function getFbc() {
@@ -1658,21 +1736,19 @@ function buildWebhookAttribution() {
   const attribution = {};
 
   if (data.autoMapWebhookAttribution !== false) {
-    assign(attribution, 'gclid', googleClickId('gclid', ['_gcl_aw', 'FPGCLAW']));
-    assign(attribution, 'wbraid', googleClickId('wbraid', ['_gcl_gb', 'FPGCLGB']));
-    assign(attribution, 'gbraid', googleClickId('gbraid', ['_gcl_ag', 'FPGCLAG']));
+    // The same set the Lead type collects, so the two cannot drift apart. Keys
+    // the intake does not recognise are stored verbatim, which is how the ids
+    // beyond its documented six reach the outbound integrations.
+    mergeInto(attribution, collectClickIds());
 
-    let msclkid = firstOf('msclkid', ['_uetmsclkid']);
-    if (msclkid && msclkid.indexOf('_uet') === 0) msclkid = msclkid.substring(4);
-    assign(attribution, 'msclkid', msclkid);
+    // Google Analytics ids arrive under these names and are normalised to
+    // cid and sid on the way in.
+    assign(attribution, 'ga_cid', getGa4ClientId());
+    assign(attribution, 'ga_sid', getGa4SessionId());
 
-    assign(attribution, 'fbc', getFbc());
-    assign(attribution, 'fbp', firstValid([
-      getCookieValues('_fbp')[0], (eventData.common_cookie || {})._fbp, eventData._fbp, eventData.fbp
-    ]));
-
-    assign(attribution, 'ga_cid', firstValid([eventData.client_id, getGa4IdFromCookie()]));
-    assign(attribution, 'ga_sid', firstValid([eventData.ga_session_id, eventData.session_id]));
+    // No conversionPage here: this event fires on the page that completes the
+    // purchase, not the one where the lead converted, so it would overwrite a
+    // correct value with a misleading one.
 
     // Routed into the lead's device data on arrival, not its attribution.
     assign(attribution, 'user_agent', eventData.user_agent || getRequestHeader('user-agent'));

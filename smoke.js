@@ -478,5 +478,63 @@ t('webhook: the lead and pageview modes are untouched by the new type', () => {
   assert.strictEqual(run({ tagType: 'pageview' }, { eventData: purchase }).setCookies.length, 2);
 });
 
+/* ---------- Cookie coverage across both payload types ---------- */
+const ALL_COOKIES = {
+  _gcl_aw: 'GCL.17.gclidvalue', _gcl_gb: 'GCL.17.wbraidvalue', _gcl_ag: 'GCL.17.kGBRAID$i1',
+  _gcl_dc: 'GCL.17.dclidvalue', _fbc: 'fb.1.17.FBCL', _fbp: 'fb.1.17.5949',
+  _uetmsclkid: '_uet561f11', _uetvid: 'uet-vid', ttclid: 'tt1', _ttp: 'ttp1',
+  li_fat_id: 'li1', _scclid: 'sc-click', _scid: 'sc1', _rdt_cid: 'rdt-c', _rdt_uuid: 'rdt-u',
+  _epik: 'epik1', twclid: 'tw1', __oppref: 'op1', __obref: 'ob1', _ga: 'GA1.1.9999.8888'
+};
+const plainEvent = { page_location: 'https://www.example.nl/bedankt', event_name: 'purchase',
+                     user_agent: 'UA', ip_override: '203.0.113.9' };
+
+t('both types read the same click and browser ids from cookies', () => {
+  const lead = run({ tagType: 'lead', projectId: 'p1' },
+    { eventData: plainEvent, cookies: ALL_COOKIES }).requests[0].body.attributionData;
+  const wh = run({ tagType: 'update', webhookUrl: WEBHOOK },
+    { eventData: plainEvent, cookies: ALL_COOKIES }).requests[0].body.attribution;
+
+  // Everything the Lead type sends must reach the webhook too, apart from the
+  // three that are deliberately different or absent there.
+  const leadOnly = ['cid', 'sid', 'conversionPage', 'consent'];
+  Object.keys(lead).forEach((key) => {
+    if (leadOnly.indexOf(key) !== -1) return;
+    assert.strictEqual(wh[key], lead[key], key + ' missing or different in the webhook payload');
+  });
+
+  assert.strictEqual(wh.ga_cid, lead.cid);
+  assert.strictEqual(wh.ga_sid, lead.sid);
+  assert.strictEqual(wh.msclkid, '561f11');
+  assert.strictEqual(wh.gbraid, 'GBRAID');
+  assert.strictEqual(wh.uetvid, 'uet-vid');
+  assert.strictEqual(wh.li_fat_id, 'li1');
+  assert.strictEqual(wh.obref, 'ob1');
+});
+
+t('webhook: no conversionPage, since the update fires on a different page', () => {
+  const wh = run({ tagType: 'update', webhookUrl: WEBHOOK },
+    { eventData: plainEvent, cookies: ALL_COOKIES }).requests[0].body.attribution;
+  assert.strictEqual('conversionPage' in wh, false);
+});
+
+t('webhook: no consent object, which the intake would drop as a non-string', () => {
+  const wh = run({ tagType: 'update', webhookUrl: WEBHOOK }, {
+    eventData: Object.assign({}, plainEvent, { consent_state: { ad_storage: true } })
+  }).requests[0].body.attribution;
+  assert.strictEqual('consent' in wh, false);
+});
+
+t('lead: still carries cid, sid, conversionPage and consent', () => {
+  const a = run({ tagType: 'lead', projectId: 'p1' }, {
+    eventData: Object.assign({}, plainEvent, { client_id: 'c1', ga_session_id: 's1',
+                                               consent_state: { ad_storage: true } })
+  }).requests[0].body.attributionData;
+  assert.strictEqual(a.cid, 'c1');
+  assert.strictEqual(a.sid, 's1');
+  assert.strictEqual(a.conversionPage, 'www.example.nl/bedankt');
+  assert.deepStrictEqual(a.consent, { ad_storage: 'granted' });
+});
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
